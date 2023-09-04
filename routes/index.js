@@ -1,8 +1,9 @@
+import UsersController from '../controllers/UsersController';
+
 const express = require('express');
 
 const router = express.Router();
 const AppController = require('../controllers/AppController');
-import UsersController from '../controllers/UsersController';
 
 // Define the API endpoints
 router.get('/status', AppController.getStatus);

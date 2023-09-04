@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import sha1 from 'sha1';
 import DBClient from '../utils/db';
-import redisClient from '../utils/redis';
+// import redisClient from '../utils/redis';
 
 class UsersController {
   /**
@@ -18,8 +18,8 @@ class UsersController {
       return res.status(400).json({ error: 'Missing password' });
     }
 
-    const email = req.body.email;
-    const password = req.body.password;
+    const { email } = req.body;
+    const { password } = req.body;
 
     // Check if the email already exists in the database
     const userExists = await DBClient.db.collection('users').findOne({ email });

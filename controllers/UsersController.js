@@ -1,51 +1,36 @@
-import { v4 as uuidv4 } from 'uuid';
-import sha1 from 'sha1';
-import DBClient from '../utils/db';
-// import redisClient from '../utils/redis';
+import crypto from 'crypto';
+import Queue from 'bull/';
+import dbClient from '../utils/db';
 
-class UsersController {
-  /**
-   * Create a new user in the database.
-   * @param {*} req - Express request object
-   * @param {*} res - Express response object
-   */
+export default class UsersController {
   static async postNew(req, res) {
-    // Check if email and password are present in the request body
-    if (!req.body.email) {
+    const { email, password } = req.body;
+    if (!email) {
       return res.status(400).json({ error: 'Missing email' });
     }
-    if (!req.body.password) {
+    if (!password) {
       return res.status(400).json({ error: 'Missing password' });
     }
+    let user = null;
 
-    const { email } = req.body;
-    const { password } = req.body;
+    try {
+      user = await dbClient.usersCollection.findOne({ email });
+    } catch (error) {
+      res.json({ error: error.message });
+    }
 
-    // Check if the email already exists in the database
-    const userExists = await DBClient.db.collection('users').findOne({ email });
-
-    if (userExists) {
+    if (user) {
       return res.status(400).json({ error: 'Already exist' });
     }
 
-    // Hash the password using SHA1
-    const hashedPassword = sha1(password);
+    const hashedPassword = crypto
+      .createHash('sha1')
+      .update(password)
+      .digest('hex');
 
-    // Create a new user object
-    const newUser = {
-      id: uuidv4(),
-      email,
-      password: hashedPassword,
-    };
-
-    // Insert the new user into the database
-    try {
-      await DBClient.db.collection('users').insertOne(newUser);
-      return res.status(201).json({ id: newUser.id, email: newUser.email });
-    } catch (error) {
-      return res.status(500).json({ error: 'Internal Server Error' });
-    }
+    const newUser = await dbClient.usersCollection.insertOne({ email, password: hashedPassword });
+    const userQueue = new Queue('sendEmail');
+    userQueue.add({ userId: newUser.insertedId });
+    return res.status(201).json({ id: newUser.insertedId, email });
   }
 }
-
-export default UsersController;

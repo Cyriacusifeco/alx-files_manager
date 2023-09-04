@@ -3,6 +3,9 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Middleware to parse JSON request bodies
+app.use(express.json());
+
 // Load routes from the 'routes' folder
 const routes = require('./routes');
 

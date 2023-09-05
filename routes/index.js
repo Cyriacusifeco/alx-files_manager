@@ -19,6 +19,7 @@ router.get('/users/me', AuthController.getMe);
 router.post('/files', FilesController.postUpload);
 router.put('/files/:id/publish', FilesController.putPublish);
 router.put('/files/:id/unpublish', FilesController.putUnpublish);
+router.get('/files/:id/data', FilesController.getFile);
 // Define the POST /users route
 router.post('/users', UsersController.postNew);
 

@@ -40,7 +40,7 @@ export default class AuthController {
     return res.status(200).send({ token });
   }
 
-  static async getDisconect(req, res) {
+  static async getDisconnect(req, res) {
     const token = req.headers['x-token'];
     if (!token) {
       return res.status(401).json({ error: 'Unauthorized' });
